@@ -1,38 +1,39 @@
-<?php 
+<?php
 
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-class Login extends CI_Controller {
+class Login extends CI_Controller
+{
 
-  public function __construct()
+    public function __construct()
     {
         parent::__construct();
         $this->load->library('form_validation');
     }
-  
+
     public function index()
-  {
-    if ($this->session->userdata('email')) {
-            redirect('user');
-        }
-    $this->form_validation->set_rules('email', 'Email', 'required|trim|valid_email');
-    $this->form_validation->set_rules('password', 'Password', 'required|trim');
-
-    if ($this->form_validation->run() == false) {
-    $data['judul_halaman'] = 'Login - Opentrip';
-    $data['navActive'] = $data['judul_halaman'];
-    $this->load->view('layout/Front-end/Login/V_Login', $data, FALSE);
-    } else {
-            $this->_login();
-        }
-  }
-
-  private function _login()
-  {
+    {
         if ($this->session->userdata('email')) {
             redirect('user');
         }
-        
+        $this->form_validation->set_rules('email', 'Email', 'required|trim|valid_email');
+        $this->form_validation->set_rules('password', 'Password', 'required|trim');
+
+        if ($this->form_validation->run() == false) {
+            $data['judul_halaman'] = 'Login - Opentrip';
+            $data['navActive'] = $data['judul_halaman'];
+            $this->load->view('layout/Front-end/Login/V_Login', $data, FALSE);
+        } else {
+            $this->_login();
+        }
+    }
+
+    private function _login()
+    {
+        if ($this->session->userdata('email')) {
+            redirect('user');
+        }
+
         $email = $this->input->post('email');
         $password = $this->input->post('password');
 
@@ -51,9 +52,9 @@ class Login extends CI_Controller {
                     $this->session->set_userdata($data);
                     if ($user['level_akses'] == 1) {
                         redirect('user/dashboardAdmin');
-                    } elseif($user['level_akses'] == 2) {
+                    } elseif ($user['level_akses'] == 2) {
                         redirect('user');
-                    } elseif($user['level_akses'] == 3) {
+                    } elseif ($user['level_akses'] == 3) {
                         redirect('user');
                     }
                 } else {
@@ -68,17 +69,17 @@ class Login extends CI_Controller {
             $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert"> Email is not registered!</div>');
             redirect('login');
         }
-    
-  }
 
-  public function dashboardAdmin()
-  {
-    $data['judul_halaman'] = 'Admin Dashboard';
-    $data['navActive'] = "Admin Dashboard";
-    $data['content'] = 'layout/Back-end/Admin/V_Dashboard';
-    $this->load->view('layout/Back-end/Template/wrapper', $data, FALSE);
-    
-  }
+    }
+
+    public function dashboardAdmin()
+    {
+        $data['judul_halaman'] = 'Admin Dashboard';
+        $data['navActive'] = "Admin Dashboard";
+        $data['content'] = 'layout/Back-end/Admin/V_Dashboard';
+        $this->load->view('layout/Back-end/Template/wrapper', $data, FALSE);
+
+    }
 
     public function registrasi()
     {
@@ -91,23 +92,21 @@ class Login extends CI_Controller {
         //trim untuk menghapus spasi jadi ridak masuk ke database
         $this->form_validation->set_rules('nama_depan', 'Nama_depan', 'required|trim');
         $this->form_validation->set_rules('nama_belakang', 'Nama_belakang', 'required|trim');
-        $this->form_validation->set_rules('email', 'Email',  'required|trim|valid_email|is_unique[user.email]', [
+        $this->form_validation->set_rules('email', 'Email', 'required|trim|valid_email|is_unique[user.email]', [
             'is_unique' => 'This email has already registered!'
         ]);
         //is_unique akan mengecek table di data base hanya tinggal masukan nama table dan field nya
         //minimal length nya berapa lalau matches untuk harus sama dengan inputan yg mana
-        $this->form_validation->set_rules('password1', 'Password',  'required|trim|min_length[3]|matches[password2]', [
+        $this->form_validation->set_rules('password1', 'Password', 'required|trim|min_length[3]|matches[password2]', [
             'matches' => 'Password dont match!',
             'min_length' => 'Password too short!'
         ]);
-        $this->form_validation->set_rules('password2', 'Password',  'required|trim|matches[password1]');
+        $this->form_validation->set_rules('password2', 'Password', 'required|trim|matches[password1]');
 
-        if ($this->form_validation->run() == false)
-        {
-        $data['judul_halaman'] = 'Registrasi - Opentrip';
-        $this->load->view('layout/Front-end/Login/V_Registrasi', $data, FALSE);
-        } 
-        else {
+        if ($this->form_validation->run() == false) {
+            $data['judul_halaman'] = 'Registrasi - Opentrip';
+            $this->load->view('layout/Front-end/Login/V_Registrasi', $data, FALSE);
+        } else {
             $email = $this->input->post('email', true);
             $data = [
                 'nama_depan' => htmlspecialchars($this->input->post('nama_depan', true)),
@@ -117,7 +116,7 @@ class Login extends CI_Controller {
                 //enkripsi password menggunakan hash dan algoritma PASSWORD_DEFAULT suapaya dipilihkan yg terbaik oleh php
                 'foto_profil' => 'default.jpg',
                 'foto_sampul' => 'default.jpg',
-                'level_akses' => 1,
+                'level_akses' => 3,
                 'user_aktif' => 0,
                 'tanggal_registrasi' => time()
             ];
@@ -152,20 +151,20 @@ class Login extends CI_Controller {
     private function _sendEmail($token, $type)
     {
         $config = [
-            'mailtype'  => 'html',
-            'charset'   => 'utf-8',
-            'protocol'  => 'smtp',
+            'mailtype' => 'html',
+            'charset' => 'utf-8',
+            'protocol' => 'smtp',
             'smtp_host' => 'ssl://smtp.gmail.com',
-            'smtp_user' => 'WandaSalon199802@gmail.com',    // Ganti dengan email gmail kamu
-            'smtp_pass' => 'Salonwanda199802',      // Password gmail kamu
+            'smtp_user' => 'msaririzki15@gmail.com',    // Ganti dengan email gmail kamu
+            'smtp_pass' => 'hzvzwmjexoqwjazg',
             'smtp_port' => 465,
-            'crlf'      => "\r\n",
-            'newline'   => "\r\n"
+            'crlf' => "\r\n",
+            'newline' => "\r\n"
         ];
         $ci = get_instance();
         $ci->email->initialize($config);
         // Email dan nama pengirim
-        $ci->email->from('no-reply@WandaSalon.com', 'WandaSalon.com | WandaSalon');
+        $ci->email->from('msaririzki15@gmail.com', 'OpenTrip');
         // Email penerima
         $email = $this->input->post('email');
         $ci->email->to($email); // Ganti dengan email tujuan kamu
